@@ -42,8 +42,12 @@ length2SI <- function(x, units='imperial', base=NULL){
       }
     }
     if (ncol(x) == length(base)){
-      x[is.na(x)] <- 0
-      xout <- as.vector(as.matrix(x) %*% base)
+      x <- as.matrix(x)
+      ## replace missing values with zero (but not for base metric)
+      xtmp <- x[,-1]
+      xtmp[is.na(xtmp)] <- 0
+      x[,2:ncol(x)] <- xtmp
+      xout <- as.vector(x %*% base)
     } else {
       stop('Length of base for conversion does not match input')
     }
