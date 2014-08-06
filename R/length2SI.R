@@ -30,7 +30,7 @@ length2SI <- function(x, units='imperial', base=NULL){
                 finger=0.022225,
                 tum=0.02474)
   
-  if (is.matrix(x)){
+  if (is.matrix(x) | is.data.frame(x)){
     if (is.null(base) & units == 'imperial') base <- c('yard', 'foot', 'inch')
     if (is.null(base)) stop('Base for conversion not supplied')
     print(paste('Convert with base', paste(base, collapse=', ')))
@@ -43,7 +43,7 @@ length2SI <- function(x, units='imperial', base=NULL){
     }
     if (ncol(x) == length(base)){
       x[is.na(x)] <- 0
-      xout <- as.vector(x %*% base)
+      xout <- as.vector(as.matrix(x) %*% base)
     } else {
       stop('Length of base for conversion does not match input')
     }
