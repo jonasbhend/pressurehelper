@@ -2,12 +2,11 @@
 #' 
 #' Reads in Swedish air pressure station data and transforms units
 #' 
-#' @param station Station name
 #' @param infile file path of air pressure data
 #' 
 #' @keywords util
 #' @export
-read_Sweden <- function(station, infile){
+read_Sweden <- function(infile){
   rawdata <- readWorksheetFromFile(infile, sheet=1, startRow=2)
   
   ## reorganise data frame

@@ -19,14 +19,24 @@
 #' @keywords util
 #' @export
 read_pressure <- function(station){
-  infile <- list.files('../data', pattern=paste0('^', station, '\\.'), full.names=TRUE)
+  ## get input file from station name
+  infile <- list.files('./orig_data', pattern=paste0('^', station, '\\.'), full.names=TRUE)
   if (!file.exists(infile)) stop(paste('File for station', station, 'does not exist'))
+  
+  ## decide which function to use
   if (station %in% c('Goteborg', 'Harnosand', 'Umea', 'Vaxjo')){
-    out <- read_Sweden(station, infile=infile)
-  } else if (station == 'Turin'){
-    out <- read_Turin(station, infile=infile)
+    out <- read_Sweden(infile)
   } else {
-    stop('Station not implemented yet (consider transforming manually)')
+    ## name of function to be used
+    sfunname <- paste0('read_', gsub(' ', '', station))
+    if (exists(sfunname)){
+      print(sfunname)
+      sfun <- get(sfunname)
+      out <- sfun(infile)
+    } else {
+      stop('Station not implemented yet (consider transforming manually)')
+    }
   }
+    
   return(out)
 }
