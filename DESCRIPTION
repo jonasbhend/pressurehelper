@@ -6,6 +6,7 @@ Description: What the package does (paragraph)
 Depends:
     R (>= 3.1.1),
     XLConnect,
-    reshape2
+    reshape2,
+    ncdf
 License: GPL-3
 LazyData: true

@@ -65,7 +65,12 @@ compact2long <- function(infile){
   
   ## append information in header
   if (any(!is.na(header[,2]))){
-    for (nn in header[!is.na(header[,2]),1]) out[[nn]] <- header[header[,1] == nn,2]
+    for (nn in header[!is.na(header[,2]),1]) {
+      out[[nn]] <- header[header[,1] == nn,2]
+      if (nn %in% c('Longitude', 'Latitude')){
+        out[[nn]] <- dms2dd(out[[nn]])
+      }
+    }
   } else {
     warning('No header information in file')
   }
