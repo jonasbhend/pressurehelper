@@ -19,13 +19,14 @@ dms2dd <- function(x){
   deg <- as.numeric(sapply(strsplit(x, '°'), function(x) x[1]))
   min <- as.numeric(sapply(strsplit(gsub(".*°", "", x), "'"), function(x) x[1]))
   sec <- as.numeric(gsub("\"", "", gsub(".*'", "", x)))
-
+  degsign <- c(1, -1)[(substring(x, 1, 1) == '-')*1 + 1]
+  
   ## set seconds and minutes to zero if missing
   min[is.na(min)] <- 0
   sec[is.na(sec)] <- 0
   
   ## compute decimal degrees
-  dec <- deg + sign(deg)*min/60 + sign(deg)*sec/3600
+  dec <- deg + degsign*min/60 + degsign*sec/3600
   
   return(dec)
 }
