@@ -29,6 +29,9 @@ compact2long <- function(infile){
   ## read in the data
   rawdata <- readWorksheet(wb, sheet=1, startRow=11)
   
+  ## remove columns that are blank (all missing values)
+  rawdata <- rawdata[,apply(rawdata, 2, function(x) any(!is.na(x)))]
+  
   ## convert time back to character (from date)
   time.i <- grep('Time', names(rawdata))
   if (length(time.i) > 0){
@@ -39,13 +42,13 @@ compact2long <- function(infile){
     }
   }
   
-  ## extract variable names to meld
+  ## extract variable names to melt
   rawnames <- names(rawdata)
   meltnames <- setdiff(rawnames, c('Year', 'Month', 'Day'))
   ## only replace first number (time indicator, less than nine observing times)
   meltnames <- unique(sub('[0-9]', '', meltnames))
 
-  ## run the meld process
+  ## run the melt process
   rmelt <- list()
   for (mn in meltnames){
     mnames <- c('Year', 'Month', 'Day', rawnames[grep(paste0('^', gsub('\\.', '.\\.', mn)), rawnames)])    
@@ -67,13 +70,13 @@ compact2long <- function(infile){
   if (any(!is.na(header[,2]))){
     for (nn in header[!is.na(header[,2]),1]) {
       out[[nn]] <- header[header[,1] == nn,2]
-      if (nn %in% c('Longitude', 'Latitude')){
-        out[[nn]] <- dms2dd(out[[nn]])
-      }
     }
   } else {
     warning('No header information in file')
   }
+  
+  ## clear garbage
+  gc()
   
   ## return data frame
   invisible(out)
