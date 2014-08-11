@@ -19,14 +19,14 @@
 #' @export
 temperature2SI <- function(x, units='C'){
   # simplify units
-  units <- gsub('\\.', '', gsub('degrees ', '', gsub('degree ', '', gsub('deg. ', '', units))))
+  units <- gsub('\\.', '', gsub('degrees ', '', gsub('degree ', '', gsub('deg. ', '', gsub('°', '', units)))))
   if (units %in% c('C', 'Celsius')){
     print('Convert Celsius to Kelvin')
     xout <- x + 273.15
   } else if (units %in% c('F', 'Fahrenheit')){
     print('Convert Fahrenheit to Kelvin')
     xout <- (x + 459.67) * 5 / 9
-  } else if (units %in% c('Re', 'Ré', 'Reaumur', 'Réaumur')){
+  } else if (units %in% c('R', 'Re', 'Ré', 'Reaumur', 'Réaumur')){
     print('Convert Réaumur to Kelvin')
     xout <- x * 5 / 4 + 273.15
   } else if (units %in% c('D', 'De', 'Delisle')){
