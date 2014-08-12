@@ -47,8 +47,10 @@ convert_time <- function(year, month, day, time, latitude=NULL){
     decl <- declination(JDymd(year, month, day))
     halfdaylength <- acos(-tan(latitude/180*pi)*tan(decl/180*pi))/pi*12
     sunsign <- c(-1, 1)[match(tolower(time), c('sunrise', 'sunset'))]
-    sunhour <- (12 + sunsign*halfdaylength)[sun.i]
-    out[sun.i] <- paste(floor(sunhour), round((sunhour%%1)*60, 0), sep=':')
+    suntime <- (12 + sunsign*halfdaylength)[sun.i]
+    sunhour <- formatC(floor(suntime), width=2, flag='0')
+    sunminute <- formatC(floor((suntime%%1)*60), width=2, flag='0')
+    out[sun.i] <- paste(sunhour, sunminute, sep=':')
   }
   
   ## check if time is string
