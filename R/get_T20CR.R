@@ -35,7 +35,7 @@ get_T20CR <- function(lon, lat, time, tfile='~/Unibe/20CR/tmean.2m.1871-1900.nc'
     virttimes <- as.POSIXct(paste0(unique(format(nctimes, '%Y')), '-', format(time, '%m-%d %H:%M')), format='%F %H:%M', tz='UTC')
     ## get temperature at nearest obs time out of ncfile 
     ## (won't work well for change of year)
-    time.i <- sapply(virttimes, function(x) which.min(as.numeric(x - nctimes)**2))
+    time.i <- sapply(virttimes, function(x) if (is.na(x)) NA else which.min(as.numeric(x - nctimes)**2))
     temp.out <- tall[time.i]
     
   } else {

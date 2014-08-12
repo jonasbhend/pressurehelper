@@ -8,7 +8,11 @@
 #' @export
 read_Paris_b <- function(infile){
   ## read infile
-  rawdata <- readWorksheetFromFile(infile, sheet=1, startRow=2)
+  wb <- loadWorkbook(infile)
+  ## set missing values
+  setMissingValue(wb, missvals)
+  ## read in data
+  rawdata <- readWorksheet(wb, sheet=1, startRow=2)
   
   ## melt data frame
   rawmelt <- melt(rawdata, c('Year', 'Month', 'Day'), value.name='P')

@@ -7,7 +7,12 @@
 #' @keywords util
 #' @export
 read_Turin <- function(infile){
-  rawdata <- readWorksheetFromFile(infile, sheet='1787-1865.06', startRow=4)
+  ## read infile
+  wb <- loadWorkbook(infile)
+  ## set missing values
+  setMissingValue(wb, missvals)
+  ## read in data
+  rawdata <- readWorksheet(wb, sheet='1787-1865.06', startRow=4)
   names(rawdata) <- c('Day', 'Month', 'Year', 'Location', 'TA1', 'Time1', 'TA2', 'Time2', 'TA3', 'Time3', 'Tmin', 'Tmax', 'Tmin.hom', 'Tmax.hom', 'Precipitation', 'Fresh.snow', 'QFF')
   
   

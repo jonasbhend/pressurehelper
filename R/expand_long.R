@@ -3,7 +3,7 @@
 #' Expands the long format to fill missing columns
 #' 
 #' @param df input data frame in long format (standard names)
-#' @param repository data frame containing station information available in repository
+#' @param inventory data frame containing station information available in inventory
 #' @param verbose logical, should information about processing steps be displayed?
 #' 
 #' @keywords util
@@ -217,13 +217,13 @@ expand_long <- function(df, inventory=read_inventory(), verbose=TRUE){
     Tname <- names(df)[(Tname[!is.na(Tname)])[1]] ## grab the first possible Temperature
     ## assume that record is not temperature corrected if no information is available
     if (is.null(df$Tcorr)){
-      if (verbose) print('Assuming that pressure is not reduced to 0º C')
+      if (verbose) print('Assuming that pressure is not reduced to 0\u00b0 C')
       df$Tcorr <- 0
     }
     if (df$Tcorr[1] == 1){
       if (!is.null(df$Comments[1])){
         Tref <- gsub('.*reduced to ', '', df$Comments[1])
-        TT <- strsplit(Tref, '°')[[1]]
+        TT <- strsplit(Tref, '\u00b0')[[1]]
         TTcelsius <- temperature2SI(as.numeric(TT[1]), TT[2]) - 273.15
         df$QFE <- (1 - gamma*TTcelsius)*df$P.orig
       } else {

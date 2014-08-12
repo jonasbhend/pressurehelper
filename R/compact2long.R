@@ -1,5 +1,9 @@
-#' compact2long
+#' @name compact2long
+#' @aliases missvals
 #' 
+#' @title compact2long
+#' 
+#' @description
 #' Converts tables in compact format to long format
 #' 
 #' @param infile file path to input file (xls[x])
@@ -17,11 +21,12 @@
 #' 
 #' @keywords util
 #' @export
+#' 
 compact2long <- function(infile){
   ## load the input file
   wb <- loadWorkbook(infile)
   ## set empty cells to missing
-  setMissingValue(wb, value="")
+  setMissingValue(wb, value=missvals)
   
   ## read the header
   header <- readWorksheet(wb, sheet=1, endRow=10, endCol=2, header=FALSE)
@@ -82,3 +87,7 @@ compact2long <- function(infile){
   invisible(out)
   
 }
+
+#' @rdname compact2long
+#' @export
+missvals <- c('', -999, -9999, -99999, -999.9, -9999.9, -99999.9, -999.99, -9999.99)

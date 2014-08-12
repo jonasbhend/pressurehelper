@@ -3,12 +3,14 @@
 \alias{expand_long}
 \title{expand_long}
 \usage{
-expand_long(df, inventory = read_inventory())
+expand_long(df, inventory = read_inventory(), verbose = TRUE)
 }
 \arguments{
 \item{df}{input data frame in long format (standard names)}
 
-\item{repository}{data frame containing station information available in repository}
+\item{inventory}{data frame containing station information available in inventory}
+
+\item{verbose}{logical, should information about processing steps be displayed?}
 }
 \description{
 Expands the long format to fill missing columns

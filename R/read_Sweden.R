@@ -7,7 +7,12 @@
 #' @keywords util
 #' @export
 read_Sweden <- function(infile){
-  rawdata <- readWorksheetFromFile(infile, sheet=1, startRow=2)
+  ## read infile
+  wb <- loadWorkbook(infile)
+  ## set missing values
+  setMissingValue(wb, missvals)
+  ## read in data
+  rawdata <- readWorksheet(wb, sheet=1, startRow=2)
   
   ## reorganise data frame
   ## only melt pressure readings first

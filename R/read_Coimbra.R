@@ -8,7 +8,11 @@
 #' @export
 read_Coimbra <- function(infile){
   ## read infile
-  rawdata <- readWorksheetFromFile(infile, sheet=1, startRow=2, endCol=9)
+  wb <- loadWorkbook(infile)
+  ## set missing values
+  setMissingValue(wb, missvals)
+  ## read in data
+  rawdata <- readWorksheet(wb, sheet=1, startRow=2, endCol=9)
   
   ## convert to local date
   ## convert back asPOSIXct to text as in original

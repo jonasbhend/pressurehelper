@@ -6,6 +6,7 @@
 #' @param month numeric or character, month of time
 #' @param day numeric or character, day of time
 #' @param time character vector of representations of time
+#' @param latitude latitude of station for conversion of sunset/rise times
 #' 
 #' @details
 #' Conversion of time to times in HH:MM format is based on the solar declination

@@ -2,12 +2,12 @@
 #' 
 #' Function to convert degree minute seconds to decimal degrees
 #'
-#' @param x character with degrees (º) and minutes (')
+#' @param x character with degrees and minutes
 #'   
 #' @keywords util
 #' 
 #' @examples
-#' dms <- c("4º15'", "-5º34'48\"")
+#' dms <- c("4\u00b015'", "-5\u00b034'48\"")
 #' dms2dd(dms)
 #' # should be 4.25 and -5.58 respectively
 #' 
@@ -22,8 +22,8 @@ dms2dd <- function(x){
     ## suppress the warnings
     oldwarn <- options('warn')
     options(warn=-1)
-    deg <- as.numeric(sapply(strsplit(x, '°'), function(x) x[1]))
-    min <- as.numeric(sapply(strsplit(gsub(".*°", "", x), "'"), function(x) x[1]))
+    deg <- as.numeric(sapply(strsplit(x, '\u00b0'), function(x) x[1]))
+    min <- as.numeric(sapply(strsplit(gsub(".*\u00b0", "", x), "'"), function(x) x[1]))
     sec <- as.numeric(gsub("\".*", "", gsub(".*'", "", x)))
     options(warn=oldwarn$warn)
     

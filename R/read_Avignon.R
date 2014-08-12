@@ -8,7 +8,11 @@
 #' @export
 read_Avignon <- function(infile){
   ## read infile
-  rawdata <- readWorksheetFromFile(infile, sheet='Table 1816', startRow=5, endCol=12, endRow=371)
+  wb <- loadWorkbook(infile)
+  ## set missing values
+  setMissingValue(wb, missvals)
+  ## read in data
+  rawdata <- readWorksheet(wb, sheet='Table 1816', startRow=5, endCol=12, endRow=371)
   names(rawdata) <- c('Montext', 'Day', 'TA1', 'TA4', 'noval', 'TA2', 'TA3', 'noval', 'P1', 'P2', 'P3', 'P4')
   ## remove empty columns
   rawdata <- rawdata[,-grep('noval', names(rawdata))]

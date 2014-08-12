@@ -8,7 +8,11 @@
 #' @export
 read_Prague <- function(infile){
   ## read infile
-  rawdata <- readWorksheetFromFile(infile, sheet=1, startRow=1)
+  wb <- loadWorkbook(infile)
+  ## set missing values
+  setMissingValue(wb, missvals)
+  ## read in data
+  rawdata <- readWorksheet(wb, sheet=1, startRow=1)
   names(rawdata) <- c('Year', 'Month', 'Day', 'P')
   rawdata$P.units <- 'mm'
   rawdata$Tcorr <- 1

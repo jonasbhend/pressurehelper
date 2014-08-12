@@ -13,6 +13,8 @@ convert_time(year, month, day, time, latitude = NULL)
 \item{day}{numeric or character, day of time}
 
 \item{time}{character vector of representations of time}
+
+\item{latitude}{latitude of station for conversion of sunset/rise times}
 }
 \description{
 Converts time in various formats to HH:MM

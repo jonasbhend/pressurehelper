@@ -8,7 +8,7 @@
 #' @export
 read_Karlsruhe <- function(infile){
   ## read infile (converted to csv for size)
-  rawdata <- read.csv(infile, sep=';', header=TRUE)
+  rawdata <- read.csv(infile, sep=';', header=TRUE, na.strings=missvals)
   ## throw out empty columns
   rawdata <- rawdata[,apply(rawdata, 2, function(x) any(!is.na(x)))]
   

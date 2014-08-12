@@ -10,7 +10,7 @@ read_Nuuk <- function(infile){
   ## load the input file
   wb <- loadWorkbook(infile)
   ## set empty cells to missing
-  setMissingValue(wb, value="")
+  setMissingValue(wb, value=missvals)
 
   ## read the data
   rawdata <- readWorksheet(wb, sheet=1)

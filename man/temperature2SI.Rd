@@ -3,12 +3,14 @@
 \alias{temperature2SI}
 \title{temperature2SI}
 \usage{
-temperature2SI(x, units = "C")
+temperature2SI(x, units = "C", verbose = TRUE)
 }
 \arguments{
 \item{x}{temperature values}
 
 \item{units}{temperature units}
+
+\item{verbose}{logicl, should info about conversion factors be displayed}
 }
 \description{
 Convert temperature from non-standard units to SI. By default,

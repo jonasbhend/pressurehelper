@@ -3,12 +3,15 @@
 \alias{read_pressure}
 \title{read_pressure}
 \usage{
-read_pressure(station, datapath = "~/Unibe/pressure/orig_data")
+read_pressure(station, datapath = "~/Unibe/pressure/orig_data",
+  compactpath = "~/Unibe/pressure/compact_data")
 }
 \arguments{
 \item{station}{name of the station}
 
 \item{datapath}{file path with station files}
+
+\item{compactpath}{file path with station files in compact format}
 }
 \description{
 Read in the original (digitized) pressure series at different stations

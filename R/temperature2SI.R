@@ -20,15 +20,15 @@
 #' @export
 temperature2SI <- function(x, units='C', verbose=TRUE){
   # simplify units
-  units <- gsub('\\.', '', gsub('degrees ', '', gsub('degree ', '', gsub('deg. ', '', gsub('°', '', units)))))
+  units <- gsub('\\.', '', gsub('degrees ', '', gsub('degree ', '', gsub('deg. ', '', gsub('\u00b0', '', units)))))
   if (units %in% c('C', 'Celsius')){
     if (verbose) print('Convert Celsius to Kelvin')
     xout <- x + 273.15
   } else if (units %in% c('F', 'Fahrenheit')){
     if (verbose) print('Convert Fahrenheit to Kelvin')
     xout <- (x + 459.67) * 5 / 9
-  } else if (units %in% c('R', 'Re', 'Ré', 'Reaumur', 'Réaumur')){
-    if (verbose) print('Convert Réaumur to Kelvin')
+  } else if (units %in% c('R', 'Re', 'R\u00e9', 'Reaumur', 'R\u00e9aumur')){
+    if (verbose) print('Convert R\u00e9aumur to Kelvin')
     xout <- x * 5 / 4 + 273.15
   } else if (units %in% c('D', 'De', 'Delisle')){
     if (verbose) print('Convert Delisle to Kelvin')
@@ -36,8 +36,8 @@ temperature2SI <- function(x, units='C', verbose=TRUE){
   } else if (units %in% c('N', 'Newton')){
     if (verbose) print('Convert Newton to Kelvin')
     xout <- x * 100 / 33 + 273.15
-  } else if (units %in% c('Ro', 'Rø', 'Roemer', 'Rømer')){
-    if (verbose) print('Convert Rømer to Kelvin')
+  } else if (units %in% c('Ro', 'R\u00f8', 'Roemer', 'R\u00f8mer')){
+    if (verbose) print('Convert R\u00f8mer to Kelvin')
     xout <- (x - 7.5) * 40/21 + 273.15
   } else if (units %in% c('Ra', 'Rankine')){
     if (verbose) print('Convert Rankine to Kelvin')

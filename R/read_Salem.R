@@ -13,7 +13,7 @@ read_Salem <- function(infile){
   for (i in 1:140){
     mon.i <- ((i - 1) %% 4) * 3 + 1:3
     year <- read.table(infile, header=F, nrows=1, skip=33 * (i-1))
-    ytmp <- read.table(infile, header=FALSE, skip=2 + 33 * (i-1), nrows=31, na.string='9999.9', row.names=NULL)
+    ytmp <- read.table(infile, header=FALSE, skip=2 + 33 * (i-1), nrows=31, na.strings='9999.9', row.names=NULL)
     names(ytmp) <- c('Day', outer(c('8AM', '10PM'), monnames[mon.i], function(x,y) paste(y, x, sep='.')))
     ytmp$Year <- as.numeric(year)
     if (i %% 4 == 1){
@@ -53,7 +53,7 @@ read_Salem <- function(infile){
   rawdata$P.units <- 'hPa'
   rawdata$Tcorr <- TRUE
   rawdata$Station <- 'Salem'
-  rawdata$Comments <- 'reduced to 0°C'
+  rawdata$Comments <- 'reduced to 0\u00b0C'
   
   return(rawdata)
   

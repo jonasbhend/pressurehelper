@@ -10,7 +10,7 @@ read_inventory <- function(file='~/Unibe/pressure/Working_inventory_pressure_181
   ## load the input file
   wb <- loadWorkbook(file)
   ## set empty cells to missing
-  setMissingValue(wb, value="")
+  setMissingValue(wb, value=missvals)
   
   ## read the header
   inventory <- readWorksheet(wb, sheet=1)
