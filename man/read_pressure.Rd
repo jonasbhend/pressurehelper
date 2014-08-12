@@ -3,10 +3,12 @@
 \alias{read_pressure}
 \title{read_pressure}
 \usage{
-read_pressure(station)
+read_pressure(station, datapath = "~/Unibe/pressure/orig_data")
 }
 \arguments{
 \item{station}{name of the station}
+
+\item{datapath}{file path with station files}
 }
 \description{
 Read in the original (digitized) pressure series at different stations
