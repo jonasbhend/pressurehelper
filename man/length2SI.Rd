@@ -3,7 +3,7 @@
 \alias{length2SI}
 \title{length2SI}
 \usage{
-length2SI(x, units = "imperial", base = NULL)
+length2SI(x, units = "imperial", base = NULL, verbose = TRUE)
 }
 \arguments{
 \item{x}{vector, or matrix of lengths}
@@ -12,6 +12,8 @@ length2SI(x, units = "imperial", base = NULL)
 
 \item{base}{conversion factors for columns of matrix if non-standard
 units are used, character if in base list}
+
+\item{verbose}{logical, should information on conversion factors be displayed?}
 }
 \description{
 Convert length units from non-standard units to SI.
