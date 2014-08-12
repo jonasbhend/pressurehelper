@@ -3,10 +3,12 @@
 \alias{expand_long}
 \title{expand_long}
 \usage{
-expand_long(df)
+expand_long(df, inventory = read_inventory())
 }
 \arguments{
 \item{df}{input data frame in long format (standard names)}
+
+\item{repository}{data frame containing station information available in repository}
 }
 \description{
 Expands the long format to fill missing columns
