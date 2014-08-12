@@ -7,36 +7,45 @@
 #' @keywords util
 #' @export
 read_Nuuk <- function(infile){
-  ## read infile
-  rawdata <- readWorksheetFromFile(infile, sheet=1)
-  names(rawdata) <- c('Year', 'Month', 'Day', 'P.1', 'l.1', 'P.2', 'l.2', 'P.3', 'l.3')
+  ## load the input file
+  wb <- loadWorkbook(infile)
+  ## set empty cells to missing
+  setMissingValue(wb, value="")
+
+  ## read the data
+  rawdata <- readWorksheet(wb, sheet=1)
+  names(rawdata) <- c('Year', 'Month', 'Day', 'P1.1', 'P1.2', 'P2.1', 'P2.2', 'P3.1', 'P3.2')
   
-  ## melt and merge
-  timestring <- c('morning', 'midday', 'evening')
-  time.hour <- c('07:00', '14:00', '20:00')
-  dms <- list()
-  for (nn in c('P', 'l')){
-    dms[[nn]] <- melt(rawdata[c(1:3, grep(nn, names(rawdata)))], c('Year', 'Day', 'Month'), value.name=nn)
-    dms[[nn]]$Local.time <- time.hour[as.numeric(gsub(paste0(nn, '.'), '', dms[[nn]]$variable))]
-    dms[[nn]]$Time.txt <- timestring[as.numeric(gsub(paste0(nn, '.'), '', dms[[nn]]$variable))]
-    dms[[nn]] <- dms[[nn]][,-grep('variable', names(dms[[nn]]))]
+  rawdata$Time1 <- 'morning'
+  rawdata$Time2 <- 'noon'
+  rawdata$Time3 <- 'evening'
+
+  ## extract variable names to melt
+  rawnames <- names(rawdata)
+  meltnames <- setdiff(rawnames, c('Year', 'Month', 'Day'))
+  ## only replace first number (time indicator, less than nine observing times)
+  meltnames <- unique(sub('[0-9]', '', meltnames))
+  
+  ## run the melt process
+  rmelt <- list()
+  for (mn in meltnames){
+    mnames <- c('Year', 'Month', 'Day', rawnames[grep(paste0('^', gsub('\\.', '.\\.', mn)), rawnames)])    
+    ## melt the dataframe
+    mtmp <- melt(rawdata[,mnames], mnames[1:3], value.name=mn)
+    ## extract time index (remove everything after the dot and all characters before)
+    vartmp <- gsub('\\..$', '', mtmp$variable)
+    vartxt <- unique(sub('[0-9]$', '', vartmp))
+    if (length(vartxt) > 1) print(vartxt)
+    mtmp$Time.i <- as.numeric(gsub(vartxt, '', vartmp))
+    rmelt[[mn]] <- mtmp[,-grep('variable', names(mtmp))]
+    rm(mtmp, vartxt, vartmp, mnames)
   }
   
-  ## merge to output data
-  rawmelt <- Reduce(merge, dms)
+  ## merge to dataframe
+  out <- Reduce(merge, rmelt)
+  out$P.units <- 'Danish inches'
+  out$Station <- 'Nuuk'
   
-  ## convert to local date
-  ## convert back asPOSIXct to text as in original
-  datestring <- paste(apply(rawmelt[,c('Year', 'Month', 'Day')], 1, paste, collapse='-'), rawmelt$Local.time)
-  rawmelt$Local.date <- as.POSIXct(datestring, format='%F %H:%M', tz='UTC')
-  
-  ## convert Danish inches to mm  
-  rawmelt$Orig.pressure <- length2SI(rawmelt[,c('P', 'l')], base=c(313.85/12, 313.85/12**2))
-  rawmelt$Pressure.units <- 'mm'
-  
-  ## reorder the time
-  rawmelt <- rawmelt[order(rawmelt$Local.date),]
-  
-  return(rawdata)
+  return(out)
   
 }

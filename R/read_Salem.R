@@ -29,9 +29,9 @@ read_Salem <- function(infile){
   
   ## melt the individual series
   ff.melt <- lapply(ff, function(x){
-    xmelt <- melt(x, c('Year', 'Day'), value.name='Orig.pressure')
+    xmelt <- melt(x, c('Year', 'Day'), value.name='P')
     xmelt$Montext <- gsub('\\..*', '', xmelt$variable)
-    xmelt$Local.time <- gsub('.*\\.', '', xmelt$variable)
+    xmelt$Time <- gsub('.*\\.', '', xmelt$variable)
     xmelt <- xmelt[,-grep('variable', names(xmelt))]
     return(xmelt)
   })
@@ -39,21 +39,21 @@ read_Salem <- function(infile){
   ## reassemble to one data frame
   rawdata <- Reduce(rbind, ff.melt)
   
-  
   ## convert to local date
   ## convert back asPOSIXct to text as in original
   rawdata$Month <- match(rawdata$Montext, monnames)
-  datestring <- paste(apply(rawdata[,c('Year', 'Month', 'Day')], 1, paste, collapse='-'), rawdata$Local.time)
+  datestring <- paste(apply(rawdata[,c('Year', 'Month', 'Day')], 1, paste, collapse='-'), rawdata$Time)
   rawdata$Local.date <- as.POSIXct(datestring, format='%F %I%p', tz='UTC')
   ## remove inexistent dates (e.g. February 31)
-  rawdata <- rawdata[!is.na(rawdata$Local.time),]
-  
-  ## reorder the time
-  rawdata <- rawdata[order(rawdata$Local.date),]
+  rawdata <- rawdata[!is.na(rawdata$Local.date),]
+  ## remove local date
+  rawdata <- rawdata[, -grep('Local.date', names(rawdata))]
   
   ## Units etc.
-  rawdata$Pressure.units <- 'hPa'
-  rawdata$Tcorrect <- TRUE
+  rawdata$P.units <- 'hPa'
+  rawdata$Tcorr <- TRUE
+  rawdata$Station <- 'Salem'
+  rawdata$Comments <- 'reduced to 0°C'
   
   return(rawdata)
   

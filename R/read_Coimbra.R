@@ -12,20 +12,27 @@ read_Coimbra <- function(infile){
   
   ## convert to local date
   ## convert back asPOSIXct to text as in original
-  rawdata$Local.time <- format(rawdata$Local.time, '%H:%M')
-  datestring <- paste(apply(rawdata[,c('Year', 'Month', 'Day')], 1, paste, collapse='-'), rawdata$Local.time)
-  rawdata$Local.date <- as.POSIXct(datestring, format='%F %H:%M', tz='UTC')
-
-  ## convert Portuguese inches to mm  
-  rawdata$Orig.pressure <- length2SI(rawdata[,5:7], base=c(27.5, 27.5/12, 27.5/12/4))
-  rawdata$Pressure.units <- 'mm'
+  rawdata$Time <- format(rawdata$Local.time, '%H:%M')
+  rawdata <- rawdata[, -grep('Local.time', names(rawdata))]
   
-  ## convert Reaumur to Celsius
-  rawdata$Orig.temperature <- temperature2SI(rawdata[['Temp..R']] + 0.25*rawdata[['X...R']], 'Re') - 273.15
-  rawdata$Temperature.units <- 'C'
+  ## rename pressure
+  names(rawdata)[grep('Inches', names(rawdata))] <- 'P.1'
+  names(rawdata)[grep('Lines', names(rawdata))] <- 'P.2'
+  names(rawdata)[grep('X..of.Lines', names(rawdata))] <- 'P.3'
+  rawdata$P.units <- 'Portuguese inches-lines-quartsoflines'
+  rawdata$Tcorr <- 0
+  ## rename temperature
+  rawdata$TP <- as.numeric(rawdata[['Temp..R']]) + 0.25*as.numeric(rawdata[['X...R']])
+  rawdata$TP.units <- 'R'
 
-  ## reorder the time
-  rawdata <- rawdata[order(rawdata$Local.date),]
+  ## add in additional variables
+  rawdata$Station <- 'Coimbra'
+  
+  ## exclude rows with values for June 31st
+  rawdata <- rawdata[!(rawdata$Month == 6 & rawdata$Day == 31),]
+  print('Exclude data for June 31, 1816')
+  rawdata$Comments <- 'The source (Jornal de Coimbra) lists observations for June 31, 1816 (?!?). Not clear whether the data afterward (or before?) are shifted by one day with respect to the Gregorian calendar.'
+  
   
   return(rawdata)
   

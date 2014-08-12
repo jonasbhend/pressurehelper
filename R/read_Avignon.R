@@ -8,36 +8,49 @@
 #' @export
 read_Avignon <- function(infile){
   ## read infile
-  rawdata <- readWorksheetFromFile(infile, sheet='Table 1816', startRow=5, endCol=12)
-  names(rawdata) <- c('Montext', 'Day', 'Temp.6h', 'Temp.14h', 'noval', 'Temp.10h', 'Temp.12h', 'noval', 'mmHg.6h', 'mmHg.10h', 'mmHg.12h', 'mmHg.14h')
+  rawdata <- readWorksheetFromFile(infile, sheet='Table 1816', startRow=5, endCol=12, endRow=371)
+  names(rawdata) <- c('Montext', 'Day', 'TA1', 'TA4', 'noval', 'TA2', 'TA3', 'noval', 'P1', 'P2', 'P3', 'P4')
   ## remove empty columns
   rawdata <- rawdata[,-grep('noval', names(rawdata))]
   ## convert month text to Months
   rawdata$Month <- cumsum(!is.na(rawdata$Montext))
   rawdata$Year <- 1816
+  rawdata$Time1 <- '06:00'
+  rawdata$Time2 <- '10:00'
+  rawdata$Time3 <- '12:00'
+  rawdata$Time4 <- '14:00'
+  rawdata <- rawdata[,-grep('Montext', names(rawdata))]
   
-  ## melt the data frame for Temperature and Pressure
-  df1 <- melt(rawdata[, -grep('Temp', names(rawdata))], c('Year', 'Month', 'Day', 'Montext'), value.name='Orig.pressure')
-  df1$hour <- gsub('mmHg.', '', df1$variable)
-  df1$Pressure.units <- 'mm'
-  df2 <- melt(rawdata[,-grep('mmHg', names(rawdata))], c('Year', 'Month', 'Day', 'Montext'), value.name='Orig.temperature')
-  df2$hour <- gsub('Temp.', '', df2$variable)
-  df2$Temperature.units <- 'C'
+  ## extract variable names to melt
+  rawnames <- names(rawdata)
+  meltnames <- setdiff(rawnames, c('Year', 'Month', 'Day'))
+  ## only replace first number (time indicator, less than nine observing times)
+  meltnames <- unique(sub('[0-9]', '', meltnames))
   
-  ## combine the two data frames
-  rawmelt <- merge(df1[, -grep('variable', names(df1))], df2[, -grep('variable', names(df2))])
+  ## run the melt process
+  rmelt <- list()
+  for (mn in meltnames){
+    mnames <- c('Year', 'Month', 'Day', rawnames[grep(paste0('^', gsub('\\.', '.\\.', mn)), rawnames)])    
+    ## melt the dataframe
+    mtmp <- melt(rawdata[,mnames], mnames[1:3], value.name=mn)
+    ## extract time index (remove everything after the dot and all characters before)
+    vartmp <- gsub('\\..$', '', mtmp$variable)
+    vartxt <- unique(sub('[0-9]$', '', vartmp))
+    if (length(vartxt) > 1) print(vartxt)
+    mtmp$Time.i <- as.numeric(gsub(vartxt, '', vartmp))
+    rmelt[[mn]] <- mtmp[,-grep('variable', names(mtmp))]
+    rm(mtmp, vartxt, vartmp, mnames)
+  }
   
-  ## compute local date
-  datestring <- paste(apply(rawmelt[,c('Year', 'Month', 'Day')], 1, paste, collapse='-'), rawmelt$hour)
-  rawmelt$Local.date <- as.POSIXct(datestring, format='%F %Hh', tz='UCT')
+  ## merge to dataframe
+  out <- Reduce(merge, rmelt)
+  print("Converting pressure and temperature to numeric")
+  out$TA <- as.numeric(out$TA)
+  out$P <- as.numeric(out$P)
+  out$Station <- 'Avignon'
+  out$TA.units <- 'C'
+  out$P.units <- 'mm'
+  out$Tcorr <- 0
   
-  ## reorder data frame
-  rawmelt <- rawmelt[order(rawmelt$Local.date), ]
-  
-  ## convert units to numeric for temperature and pressure (missing data, etc.)
-  rawmelt$Orig.temperature <- as.numeric(rawmelt$Orig.temperature)
-  rawmelt$Orig.pressure <- as.numeric(rawmelt$Orig.pressure)
-  
-  return(rawmelt)
-  
+  return(out)
 }

@@ -11,12 +11,12 @@ read_Sweden <- function(infile){
   
   ## reorganise data frame
   ## only melt pressure readings first
-  rawmelt <- melt(rawdata[, c(1:3, grep('inHg', names(rawdata)))], 1:3, value.name='Orig.pressure')
-  rawmelt$Pressure.units <- 'inHg'
+  rawmelt <- melt(rawdata[, c(1:3, grep('inHg', names(rawdata)))], 1:3, value.name='P')
+  rawmelt$P.units <- 'Swedish inches (dec tum)'
   ## also add in the temperature data
   if (length(grep('C', names(rawdata))) > 1){
-    rawtmp <- melt(rawdata[, c(1:3, grep('X.C.', names(rawdata)))], 1:3, value.name='Orig.temperature')
-    rawtmp$Temperature.units <- 'C'
+    rawtmp <- melt(rawdata[, c(1:3, grep('X.C.', names(rawdata)))], 1:3, value.name='TP')
+    rawtmp$TP.units <- 'C'
     names(rawtmp)[grep('variable', names(rawtmp))] <- 'variable2'
     ## merge the two data frames 
     rawmelt <- merge(rawmelt, rawtmp)    
@@ -34,22 +34,18 @@ read_Sweden <- function(infile){
   } else if ('X.6am.from.March.to.October' %in% names(rawdata)){
     hour[rawmelt$Month %in% 3:10 & hour == '7AM'] <- '6AM'
   }
-    
-  ## convert to local date
-  datestring <- paste(apply(rawmelt[,c('Year', 'Month', 'Day')], 1, paste, collapse='-'), hour)
-  rawmelt$Hour <- hour
-  rawmelt$Local.date <- as.POSIXct(datestring, format='%F %I%p', tz='UCT')
-  
-  ## order by time
-  rawmelt <- rawmelt[order(rawmelt$Local.date),]
+
+  ## add in time
+  rawmelt$Time <- hour
   
   ## convert units of pressure reading
-  rawmelt$mmHg <- length2SI(rawmelt$Orig.pressure, units='tum') * 1000
-  rawmelt$hPa <- 13595.1 * 9.81 * rawmelt$mmHg * 10**(-5)
-  rawmelt$hPa.Tcorrect <- FALSE
+  rawmelt$Tcorr <- 0
   
   ## remove the variable names
   rawmelt <- rawmelt[,-grep('variable', names(rawmelt))]
+  
+  ## add in the station name
+  rawmelt$Station <- gsub('.*\\/', '', gsub('\\..*', '', infile))
   
   return(rawmelt)
 }

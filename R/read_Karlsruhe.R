@@ -48,25 +48,21 @@ read_Karlsruhe <- function(infile){
   rawmelt <- rawmelt[,-grep('hi', names(rawmelt))]
   
   ## change name to descriptive and convert units
-  names(rawmelt)[names(rawmelt) == 'hr_z.h'] <- 'Local.time'
+  names(rawmelt)[names(rawmelt) == 'hr_z.h'] <- 'Time'
   names(rawmelt)[names(rawmelt) == 'hr_miss.h'] <- 'Time.missing'
-  names(rawmelt)[names(rawmelt) == 'hr_pa.m'] <- 'Orig.pressure'
-  rawmelt$Orig.pressure <- rawmelt$Orig.pressure/10
-  rawmelt$Pressure.unit <- 'hPa'
-  names(rawmelt)[names(rawmelt) == 'hr_tp.m'] <- 'Orig.temperature'
-  rawmelt$Orig.temperature <- rawmelt$Orig.temperature/10
-  rawmelt$Temperature.units <- 'C'
-  names(rawmelt)[names(rawmelt) == 'hr_t.m'] <- 'Orig.airtemperature'
-  rawmelt$Orig.airtemperature <- rawmelt$Orig.airtemperature / 10
-  names(rawmelt)[names(rawmelt) == 'hr_qf.m'] <- 'Orig.QFF'
-  rawmelt$Orig.QFF <- rawmelt$Orig.QFF/100
-  
-  ## convert to local date
-  datestring <- paste(apply(rawmelt[,c('Year', 'Month', 'Day')], 1, paste, collapse='-'), rawmelt$Local.time)
-  rawmelt$Local.date <- as.POSIXct(datestring, format='%F %H:%M', tz='UTC')
-  
-  ## reorder the time
-  rawmelt <- rawmelt[order(rawmelt$Local.date),]
+  names(rawmelt)[names(rawmelt) == 'hr_pa.m'] <- 'P'
+  rawmelt$P <- rawmelt$P/10
+  rawmelt$P.units <- 'hPa'
+  names(rawmelt)[names(rawmelt) == 'hr_tp.m'] <- 'TP'
+  rawmelt$TP <- rawmelt$TP/10
+  rawmelt$TP.units <- 'C'
+  names(rawmelt)[names(rawmelt) == 'hr_t.m'] <- 'TA'
+  rawmelt$TA <- rawmelt$TA / 10
+  rawmelt$TA.units <- 'C'
+  names(rawmelt)[names(rawmelt) == 'hr_qf.m'] <- 'QFF'
+  rawmelt$QFF <- rawmelt$QFF/100
+  rawmelt$Tcorr <- 1
+  rawmelt$Station <- 'Karlsruhe'
   
   return(rawmelt)
   
