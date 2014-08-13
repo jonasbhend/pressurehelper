@@ -17,7 +17,8 @@ expand_long <- function(df, inventory=read_inventory(), verbose=TRUE){
   }
   
   ## strip inventory down to relevant line
-  station.i <- which(df$Station[1] == inventory$Standard.Name | df$Station[1] == inventory$Station)
+  ## check the stripped station name against standard name and long form against long name
+  station.i <- which(gsub(' ', '', df$Station[1]) == inventory$Standard.Name | df$Station[1] == inventory$Station)
   if (length(station.i) != 1) stop(paste('Station', df$Station[1], 'not in inventory'))
   inventory <- inventory[station.i, ]
   
@@ -47,7 +48,7 @@ expand_long <- function(df, inventory=read_inventory(), verbose=TRUE){
     print('Convert time to as.POSIXct and to UTC')
     print('--------------------------------------------------')
   }
-
+  
   ## convert time in files
   for (nn in c('Year', 'Month', 'Day')) df[[nn]] <- as.numeric(as.character(df[[nn]]))
   ## replace times if these are missing
@@ -142,11 +143,13 @@ expand_long <- function(df, inventory=read_inventory(), verbose=TRUE){
     if (is.null(df$TA.20CR)) df$TA.20CR <- Temp20CR - 273.15
   }
   
-  if (is.null(df$QFF)){
+  ## convert pressure from whatever to QFE
+  P.names <- setdiff(names(df)[grep('^P', names(df))], 'P.units')
+  if (length(P.names) > 0){
     ## convert pressure reading
     if (verbose) {
       print('')
-      print('Convert pressure')
+      print('Convert pressure to QFE')
       print('--------------------------------------------------')
     }
     P.unit <- df$P.units[1]
@@ -155,24 +158,32 @@ expand_long <- function(df, inventory=read_inventory(), verbose=TRUE){
       df$P.orig <- df$P
     } else {
       if (P.unit == 'mm'){
-        df$mmHg <- df$P
+        if (is.null(df$mmHg)) df$mmHg <- df$P
       } else {
         if (verbose) print(paste('Convert from', P.unit, 'to mmHg'))
-        P.names <- setdiff(names(df)[grep('^P', names(df))], c('P.units', 'P.orig'))
-        ## replace X's with 11
+        ## replace X's with 11 and fix the Geneva series
         df[P.names] <- lapply(df[P.names], function(x){
           xout <- x
           xout[x == 'X'] <- 11
+          ## fix Geneva series
+          if (mean(xout == 0, na.rm=T) > 0.7){
+            print("Fixing too many zeroes in pressure series")
+            xtmp <- xout[!is.na(xout)]
+            for (i in 2:length(xtmp)) xtmp[i] <- if (xtmp[i] == 0) xtmp[i-1] else xtmp[i]
+            xout[!is.na(xout)] <- xtmp
+          }
           xout <- as.numeric(xout)
           return(xout)
         })
         ## get the units and convert
         if (P.unit %in% c('inHG', 'inHg', 'English inches')){
-          base <- 0.9144/36*c(1, 1/12, 1/12**2)
+          base <- 0.0254 / c(1, 12, 12**2)
         } else if (P.unit == 'Swedish inches (dec tum)'){
-          base <- 0.02969*c(1, 1/12, 1/12) ## Swedish inches, lines and points
+          base <- 0.02969 ## Swedish inches in decimal units
         } else if (P.unit == 'Danish inches'){
           base <- 0.31385 / 12**c(1,2)
+        } else if (P.unit == 'Rijnlandse inches-lines-quartsoflines'){
+          base <- 0.0262 / c(1,12,48)
         } else if (P.unit == 'Portuguese inches-lines-quartsoflines'){
           base <- 0.0275  / c(1, 12, 12*4)
         } else if (length(grep('French inches', P.unit)) == 1){
@@ -184,7 +195,7 @@ expand_long <- function(df, inventory=read_inventory(), verbose=TRUE){
         } else {
           stop('Units not implemented yet')
         }
-        df$mmHg <- length2SI(as.matrix(df[,P.names]), units='', base=base[seq(P.names)], verbose=verbose) * 1000
+        if (is.null(df$mmHg)) df$mmHg <- length2SI(as.matrix(df[,P.names]), units='', base=base[seq(P.names)], verbose=verbose) * 1000
         ## check the result of the conversion for non-sensical numbers
         mmHg.test <- length2SI(as.matrix(df[,P.names[1]]), units='', base=base[1], verbose=FALSE)*1000
         test.i <- which(abs(df$mmHg - mmHg.test) > base[1]*1000)
@@ -204,47 +215,103 @@ expand_long <- function(df, inventory=read_inventory(), verbose=TRUE){
       df$P.orig <- pressure2SI(df$mmHg, 0, df$Latitude)
     }
     
-    
-    ## Reduce to 0 degree Celsius
-    if (verbose) {
-      print('')
-      print('Reduce pressure to 0 deg. C')
-      print('--------------------------------------------------')
-    }
-    
-    gamma <- 1.82e-4 ## thermal expansion of mercury at 0 deg. C
-    Tname <- match(c('TP.orig', 'TP.20CR'), names(df))
-    Tname <- names(df)[(Tname[!is.na(Tname)])[1]] ## grab the first possible Temperature
-    ## assume that record is not temperature corrected if no information is available
-    if (is.null(df$Tcorr)){
-      if (verbose) print('Assuming that pressure is not reduced to 0\u00b0 C')
-      df$Tcorr <- 0
-    }
-    if (df$Tcorr[1] == 1){
-      if (!is.null(df$Comments[1])){
-        Tref <- gsub('.*reduced to ', '', df$Comments[1])
-        TT <- strsplit(Tref, '\u00b0')[[1]]
-        TTcelsius <- temperature2SI(as.numeric(TT[1]), TT[2]) - 273.15
-        df$QFE <- (1 - gamma*TTcelsius)*df$P.orig
-      } else {
-        df$QFE <- df$P.orig
+    ## check if QFE is already available
+    if (is.null(df[['QFE']])){
+      ## Reduce to 0 degree Celsius
+      if (verbose) {
+        print('')
+        print('Reduce pressure to 0 deg. C')
+        print('--------------------------------------------------')
       }
+      
+      gamma <- 1.82e-4 ## thermal expansion of mercury at 0 deg. C
+      ## assume that record is not temperature corrected if no information is available
+      if (is.null(df$Tcorr)){
+        if (verbose) print('Assuming that pressure is not reduced to 0\u00b0 C')
+        df$Tcorr <- 0
+      }
+      ## only correct temperature if 
+      if (df$Tcorr[1] == 1){
+        if (!is.null(df$Comments[1])){
+          Tref <- gsub('.*educed.*to ', '', df$Comments[1])
+          TT <- strsplit(Tref, '\u00b0')[[1]]
+          TTcelsius <- temperature2SI(as.numeric(TT[1]), TT[2]) - 273.15
+          print(paste('Change temperature reduction from', Tref, 'to 0\u00b0C'))
+          if (is.null(df[['QFE']])) df$QFE <- (1 - gamma*TTcelsius)*df$P.orig
+        } else {
+          if (is.null(df[['QFE']])) df$QFE <- df$P.orig
+        }
+        ## set QFE flag to 1 (reduced for temperature in original record)
+        df$QFE.flag <- 1
+      } else {
+        Tnames <- intersect(c('TP.orig', 'TA.orig', 'TP.20CR'), names(df))
+        
+        print(paste('Using', paste(Tnames, collapse=' and '), 'for temperature reduction'))
+        Temperature <- df[[Tnames[1]]]
+        ## specify QFE flag
+        QFE.flagval <- c(TP.orig=2, TA.orig=3, TP.20CR=4)
+        df$QFE.flag <- QFE.flagval[Tnames[1]]
+        if (length(Tnames) > 1 & any(is.na(df[[Tnames[1]]]))){
+          ## replace missing values in TP.orig with TA.orig or TP.20CR
+          ## loop through remaining temperature names and fill the gaps
+          for (tn in Tnames[2:length(Tnames)]){
+            df$QFE.flag[is.na(Temperature)] <- QFE.flagval[tn]
+            Temperature[is.na(Temperature)] <- df[[tn]][is.na(Temperature)]          
+          }
+        }
+        ## reduce pressure at station to 0 deg. C
+        if (is.null(df[['QFE']])) df$QFE <- (1 - gamma * Temperature) * df$P.orig
+      }    
     } else {
-      print(paste('Using', Tname, 'for temperature reduction'))
-      df$QFE <- (1 - gamma * df[[Tname]]) * df$P.orig
-    }    
-  } else {
-    if (verbose){
-      print('')
-      print('Pressure AMSL already available')
-      print('--------------------------------------------------')
-      if (is.null(df$P.orig)) df$P.orig <- NA
-      if (is.null(df$QFE)) df$QFE <- NA
+      df$QFE.flag <- 1
     }
+    
   }
   
+  ## convert station pressure to MSLP
+  if (verbose){
+    print('')
+    print('Convert QFE to QFF')
+    print('--------------------------------------------------')
+  }
+  
+  ## check if QFF is already available
+  if (!is.null(df[['QFF']])){
+    print('Pressure AMSL already available')
+    df$QFF.flag <- 1
+  } else {
+    Tnames <- intersect(c('TA.orig', 'TA.20CR'), names(df))
+    
+    print(paste('Using', paste(Tnames, collapse=' and '), 'for reduction to sea level'))
+    Temperature <- df[[Tnames[1]]]
+    ## specify QFE flag
+    df$QFF.flag <- c(TA.orig=2, TA.20CR=3)[Tnames[1]]
+    if (length(Tnames) == 2 & any(is.na(df[[Tnames[1]]]))){
+      ## replace missing values in TP.orig with 20CR
+      Temperature[is.na(df[[Tnames[1]]])] <- df[[Tnames[2]]][is.na(df[[Tnames[1]]])]
+      df$QFF.flag[is.na(df[[Tnames[1]]])] <- 3 ## to indicate that we're using 20CR
+    }
+    ## reduce pressure to sea level
+    df[['QFF']] <- QFE2QFF(QFE=df[['QFE']], 
+                           elevation=df[['Elevation']], 
+                           latitude=df[['Latitude']], 
+                           temperature=Temperature)
+    
+  }
+  
+  
+  ## add in missing variables (dummies)
+  if (is.null(df[['mmHg']])) df$mmHg <- NA
+  if (is.null(df[['P.orig']])) df$P.orig <- NA
+  if (is.null(df[['QFE']])) df$QFE <- NA    
+  
+  ## fix flags for missing values
+  df$QFE.flag[is.na(df[['QFE']])] <- 0
+  df$QFF.flag[is.na(df[['QFF']])] <- 0
+  
+  
   ## reorder data frame to be more easily readable
-  dfnames <- c('Station', 'Longitude', 'Latitude', 'Location.missing', 'Elevation', 'Elevation.missing', 'UTC.date', 'Local.date', 'Year', 'Month', 'Day', 'Local.time', 'Time', 'Time.missing', names(df)[grep('^P', names(df))], names(df)[grep('^TP', names(df))], names(df)[grep('^TA', names(df))], 'T.units')
+  dfnames <- c('Station', 'Longitude', 'Latitude', 'Location.missing', 'Elevation', 'Elevation.missing', 'UTC.date', 'Local.date', 'Year', 'Month', 'Day', 'Local.time', 'Time', 'Time.missing', P.names, 'P.units', 'mmHg', 'Tcorr', 'P.orig', 'QFE', 'QFE.flag', 'QFF', 'QFF.flag', names(df)[grep('^TP', names(df))], names(df)[grep('^TA', names(df))], 'T.units')
   dfnames <- intersect(dfnames, names(df))
   df <- df[,c(dfnames, setdiff(names(df), dfnames))]
   
