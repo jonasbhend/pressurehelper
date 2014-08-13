@@ -51,14 +51,16 @@ convert_time <- function(year, month, day, time, latitude=NULL){
     }
     
     ## check if time is sunrise or sunset
-    sun.i <- tolower(time) %in% c('sunrise', 'sunset')
+    sun.i <- tolower(time) %in% c('sunrise', 'sunset', 'sunrise+12')
     if (sum(sun.i) > 0){
       if (is.null(latitude)) stop('Latitude is missing, needed to convert sunrise and sunset times')
       decl <- declination(JDymd(year, month, day))
       halfdaylength <- acos(-tan(latitude/180*pi)*tan(decl/180*pi))/pi*12
-      sunsign <- c(-1, 1)[match(tolower(time), c('sunrise', 'sunset'))]
+      sunsign <- c(-1, 1)[match(substr(tolower(time), 1, 6), c('sunris', 'sunset'))]
+      sunadd <- 0
+      if (any(time == 'sunrise+12')) sunadd[which(time == 'sunrise+12')] <- 12
       suntime <- (12 + sunsign*halfdaylength)[sun.i]
-      sunhour <- formatC(floor(suntime), width=2, flag='0')
+      sunhour <- formatC(floor(suntime) + sunadd, width=2, flag='0')
       sunminute <- formatC(floor((suntime%%1)*60), width=2, flag='0')
       out[sun.i] <- paste(sunhour, sunminute, sep=':')
     }
