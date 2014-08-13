@@ -29,11 +29,18 @@ convert_time <- function(year, month, day, time, latitude=NULL){
   ampm.i <- substr(toupper(time), nchar(time) - 1, nchar(time)) %in% c('AM', 'PM')
   if (sum(ampm.i) > 0) out[ampm.i] <- format(as.POSIXct(paste0(year, '-', month, '-', day, ' ', toupper(time))[ampm.i], format='%F %I%p', tz='UTC'), '%H:%M')  
   
-  ## check if time is in standard format
+  ## check if time is numeric
+  if (is.numeric(time)){
+    hours <- formatC(floor(time), width=2, flag='0')
+    minutes <- formatC(floor((time %% 1)*60), width=2, flag='0')
+    out <- paste(hours, minutes, sep=':')
+  }
+  
+  ## check if time is in standard format HH:MM
   ## also suppress warnings for this
   oldwarn <- options('warn')
   options(warn=-1)
-  hhmm.i <- sapply(strsplit(time, ':'), function(x) all(!is.na(as.numeric(x))))
+  hhmm.i <- sapply(strsplit(as.character(time), ':'), function(x) all(!is.na(as.numeric(x))))
   options(warn=oldwarn$warn)
   if (sum(hhmm.i) > 0) {
     ## add leading zeroes
