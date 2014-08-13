@@ -22,8 +22,10 @@ read_Paris_b <- function(infile){
   ## remove variable
   rawmelt <- rawmelt[,-grep('variable', names(rawmelt))]
   ## convert pressure to numeric
-  print('Convert from cm to mm (wrong metadata in .xls)')
-  rawmelt$P <- as.numeric(rawmelt$P)*10
+  ## print('Convert from cm to mm (wrong metadata in .xls)')
+  ## rawmelt$P <- as.numeric(rawmelt$P)*10
+  print("Add in 700 mmHg to fix pressure reading")
+  rawmelt$P <- as.numeric(rawmelt$P) + 700
   ## add in station name
   rawmelt$Station <- 'Paris_b'
   ## add in flag for temperature reduction
