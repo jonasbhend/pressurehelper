@@ -17,12 +17,13 @@ read_Sweden <- function(infile){
   ## reorganise data frame
   ## only melt pressure readings first
   rawmelt <- melt(rawdata[, c(1:3, grep('inHg', names(rawdata)))], 1:3, value.name='P')
-  rawmelt$P.units <- 'Swedish inches (dec tum)'
+  rawmelt$hour <- toupper(gsub('.*\\.', '', rawmelt$variable))
+  rawmelt <- rawmelt[, -grep('variable', names(rawmelt))]
   ## also add in the temperature data
   if (length(grep('C', names(rawdata))) > 1){
     rawtmp <- melt(rawdata[, c(1:3, grep('X.C.', names(rawdata)))], 1:3, value.name='TP')
-    rawtmp$TP.units <- 'C'
-    names(rawtmp)[grep('variable', names(rawtmp))] <- 'variable2'
+    rawtmp$hour <- toupper(gsub('.*\\.', '', rawtmp$variable))
+    rawtmp <- rawtmp[, -grep('variable', names(rawtmp))]
     ## merge the two data frames 
     rawmelt <- merge(rawmelt, rawtmp)    
   }
@@ -45,12 +46,14 @@ read_Sweden <- function(infile){
   
   ## convert units of pressure reading
   rawmelt$Tcorr <- 0
+  rawmelt$TP.units <- 'C'
   
   ## remove the variable names
   rawmelt <- rawmelt[,-grep('variable', names(rawmelt))]
   
   ## add in the station name
   rawmelt$Station <- gsub('.*\\/', '', gsub('\\..*', '', infile))
+  rawmelt$P.units <- 'Swedish inches (dec tum)'
   
   return(rawmelt)
 }
