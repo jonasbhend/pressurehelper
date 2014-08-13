@@ -23,7 +23,7 @@ QFE2QFF <- function(QFE, elevation, latitude, temperature){
   lapse <- 0.0065 ## assumed lapse rate for mean temperature
 
   ## check if temperature is in Kelvin 
-  if (temperature < 200){
+  if (median(temperature, na.rm=T) < 200){
     temperature <- temperature + 273.15
   }
   
