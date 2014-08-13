@@ -80,6 +80,11 @@ compact2long <- function(infile){
     warning('No header information in file')
   }
   
+  ## check on format of Temperature correction flag
+  if (!is.null(out$Tcorr)){
+    out$Tcorr <- as.numeric(out$Tcorr)
+  }
+  
   ## clear garbage
   gc()
   
