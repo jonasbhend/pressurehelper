@@ -11,7 +11,7 @@ read_QuebecCity <- function(infile){
   ## read in data (do it the hard way as the leap years are malformatted, i.e. julday 366)
   fwidths <- list(c(4, -2, 3, rep(c(-1, 7), 10)), c(4,-2,3,rep(c(-1,7), 8)))
   fwidths <- fwidths[c(rep(1,365),2)]
-  rfwf <- as.matrix(read.fwf(infile, width=fwidths, skip=1))
+  rfwf <- as.matrix(read.fwf(infile, widths=fwidths, skip=1))
   
   ## expand matrix (add in missing columns for days 366 with missing values)
   rind <- c(seq(1, 365*12), 365*12 + c(1:2, NA, 3:6, NA, 7:10))
@@ -21,7 +21,7 @@ read_QuebecCity <- function(infile){
   ## convert back to data frame with one date per line
   rawdata <- data.frame(t(array(t(rfwf), c(12, length(rfwf)/12))))  
   ## add in original names
-  names(rawdata) <- read.table(infile, header=FALSE, stringsAsFactors=FALSE, nrow=1)
+  names(rawdata) <- read.table(infile, header=FALSE, stringsAsFactors=FALSE, nrows=1)
   
   ## convert date
   rdate <- as.Date(paste(rawdata$year, formatC(rawdata$day, width=3, flag='0')), format='%Y %j')
