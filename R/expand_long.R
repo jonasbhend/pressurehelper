@@ -189,6 +189,8 @@ expand_long <- function(df, inventory=read_inventory(), verbose=TRUE){
         } else if (length(grep('French inches', P.unit)) == 1){
           if (P.unit == 'French inches-lines-16thlines'){
             base <- 0.02707 * c(1, 1/12, 1/12/16)
+          } else if (P.unit == 'French inches-lines-quartsoflines'){
+            base <- 0.02707 * c(1, 1/12, 1/12/4)
           } else {
             base <- 0.02707 * c(1, 1/12, 1/12**2)
           }

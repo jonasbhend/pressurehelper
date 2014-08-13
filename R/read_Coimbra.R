@@ -20,10 +20,10 @@ read_Coimbra <- function(infile){
   rawdata <- rawdata[, -grep('Local.time', names(rawdata))]
   
   ## rename pressure
-  names(rawdata)[grep('Inches', names(rawdata))] <- 'P.1'
-  names(rawdata)[grep('Lines', names(rawdata))] <- 'P.2'
+  names(rawdata)[grep('^Inches$', names(rawdata))] <- 'P.1'
+  names(rawdata)[grep('^Lines$', names(rawdata))] <- 'P.2'
   names(rawdata)[grep('X..of.Lines', names(rawdata))] <- 'P.3'
-  rawdata$P.units <- 'Portuguese inches-lines-quartsoflines'
+  rawdata$P.units <- 'French inches-lines-quartsoflines'
   rawdata$Tcorr <- 0
   ## rename temperature
   rawdata$TP <- as.numeric(rawdata[['Temp..R']]) + 0.25*as.numeric(rawdata[['X...R']])
