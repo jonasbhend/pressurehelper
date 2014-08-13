@@ -25,47 +25,50 @@ convert_time <- function(year, month, day, time, latitude=NULL){
   ntime <- length(time)
   out <- rep(NA, ntime)
   
-  ## check if time is AM or PM
-  ampm.i <- substr(toupper(time), nchar(time) - 1, nchar(time)) %in% c('AM', 'PM')
-  if (sum(ampm.i) > 0) out[ampm.i] <- format(as.POSIXct(paste0(year, '-', month, '-', day, ' ', toupper(time))[ampm.i], format='%F %I%p', tz='UTC'), '%H:%M')  
-  
   ## check if time is numeric
   if (is.numeric(time)){
+    
     hours <- formatC(floor(time), width=2, flag='0')
     minutes <- formatC(floor((time %% 1)*60), width=2, flag='0')
     out <- paste(hours, minutes, sep=':')
-  }
   
-  ## check if time is in standard format HH:MM
-  ## also suppress warnings for this
-  oldwarn <- options('warn')
-  options(warn=-1)
-  hhmm.i <- sapply(strsplit(as.character(time), ':'), function(x) all(!is.na(as.numeric(x))))
-  options(warn=oldwarn$warn)
-  if (sum(hhmm.i) > 0) {
-    ## add leading zeroes
-    ttmp <- paste0('000', time[hhmm.i])
-    out[hhmm.i] <- substr(ttmp, nchar(ttmp) - 4, nchar(ttmp))
-  }
-  
-  ## check if time is sunrise or sunset
-  sun.i <- tolower(time) %in% c('sunrise', 'sunset')
-  if (sum(sun.i) > 0){
-    if (is.null(latitude)) stop('Latitude is missing, needed to convert sunrise and sunset times')
-    decl <- declination(JDymd(year, month, day))
-    halfdaylength <- acos(-tan(latitude/180*pi)*tan(decl/180*pi))/pi*12
-    sunsign <- c(-1, 1)[match(tolower(time), c('sunrise', 'sunset'))]
-    suntime <- (12 + sunsign*halfdaylength)[sun.i]
-    sunhour <- formatC(floor(suntime), width=2, flag='0')
-    sunminute <- formatC(floor((suntime%%1)*60), width=2, flag='0')
-    out[sun.i] <- paste(sunhour, sunminute, sep=':')
-  }
-  
-  ## check if time is string
-  txt.i <- tolower(time) %in% c('morning', 'noon', 'afternoon', 'evening')
-  if (sum(txt.i) > 0){
-    txt.key <- c(morning='08:00', noon='12:00', afternoon='16:00', evening='20:00')
-    out[txt.i] <- txt.key[tolower(time)[txt.i]]
+  } else {
+    
+    ## check if time is AM or PM
+    ampm.i <- substr(toupper(time), nchar(time) - 1, nchar(time)) %in% c('AM', 'PM')
+    if (sum(ampm.i) > 0) out[ampm.i] <- format(as.POSIXct(paste0(year, '-', month, '-', day, ' ', toupper(time))[ampm.i], format='%F %I%p', tz='UTC'), '%H:%M')  
+    
+    ## check if time is in standard format HH:MM
+    ## also suppress warnings for this
+    oldwarn <- options('warn')
+    options(warn=-1)
+    hhmm.i <- sapply(strsplit(as.character(time), ':'), function(x) all(!is.na(as.numeric(x))))
+    options(warn=oldwarn$warn)
+    if (sum(hhmm.i) > 0) {
+      ## add leading zeroes
+      ttmp <- paste0('000', time[hhmm.i])
+      out[hhmm.i] <- substr(ttmp, nchar(ttmp) - 4, nchar(ttmp))
+    }
+    
+    ## check if time is sunrise or sunset
+    sun.i <- tolower(time) %in% c('sunrise', 'sunset')
+    if (sum(sun.i) > 0){
+      if (is.null(latitude)) stop('Latitude is missing, needed to convert sunrise and sunset times')
+      decl <- declination(JDymd(year, month, day))
+      halfdaylength <- acos(-tan(latitude/180*pi)*tan(decl/180*pi))/pi*12
+      sunsign <- c(-1, 1)[match(tolower(time), c('sunrise', 'sunset'))]
+      suntime <- (12 + sunsign*halfdaylength)[sun.i]
+      sunhour <- formatC(floor(suntime), width=2, flag='0')
+      sunminute <- formatC(floor((suntime%%1)*60), width=2, flag='0')
+      out[sun.i] <- paste(sunhour, sunminute, sep=':')
+    }
+    
+    ## check if time is string
+    txt.i <- tolower(time) %in% c('morning', 'noon', 'afternoon', 'evening')
+    if (sum(txt.i) > 0){
+      txt.key <- c(morning='08:00', noon='12:00', afternoon='16:00', evening='20:00')
+      out[txt.i] <- txt.key[tolower(time)[txt.i]]
+    }    
   }
   
   ## throw warning if times are not converted properly
