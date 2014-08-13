@@ -4,7 +4,7 @@
 \alias{compact2long}
 \alias{missvals}
 \title{compact2long}
-\format{\preformatted{ chr [1:9] "" "-999" "-9999" "-99999" "-999.9" "-9999.9" "-99999.9" ...
+\format{\preformatted{ num [1:8] -999 -9999 -99999 -1000 -10000 ...
 }}
 \usage{
 compact2long(infile)
