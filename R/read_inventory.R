@@ -21,13 +21,15 @@ read_inventory <- function(file='~/Unibe/pressure/Working_inventory_pressure_181
   names(inventory)[names(inventory) == 'Elevation..m.'] <- 'Elevation'
   names(inventory)[grep('Times.of.observation', names(inventory))] <- 'Times.of.observation'
   names(inventory)[grep('Period.available', names(inventory))] <- 'Period.available'
-  names(inventory)[names(inventory) == 'Temperature.at.the.barometer'] <- 'hasTP'
+  names(inventory)[grep('Temperature.at.the.barometer', names(inventory))] <- 'hasTP'
   names(inventory)[names(inventory) == 'Reduced.for.temperature'] <- 'Tcorr'  
   names(inventory)[names(inventory) == 'Reduced.to.sea.level'] <- 'hasQFF'  
   
   ## change some of the variables to boolean
-  inventory$hasQFF <- inventory$hasQFF == 'X' & !is.na(inventory$hasQFF)
-  inventory$hasTP <- inventory$hasTP == 'X' & !is.na(inventory$hasTP)
+  inventory$hasQFF <- as.logical(inventory$hasQFF)
+  
+  ## add in standard names as rownames for ease of selection
+  rownames(inventory) <- inventory$Standard.Name
   
   return(inventory)
 }

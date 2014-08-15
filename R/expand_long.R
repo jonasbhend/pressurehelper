@@ -22,6 +22,9 @@ expand_long <- function(df, inventory=read_inventory(), verbose=TRUE){
   if (length(station.i) != 1) stop(paste('Station', df$Station[1], 'not in inventory'))
   inventory <- inventory[station.i, ]
   
+  ## include the full station name
+  df$Station.name <- inventory[['Station']]
+  
   ## add and convert Longitudes and Latitudes if not present
   for (nn in c('Latitude', 'Longitude')){
     if (!is.null(df[[nn]])) {
@@ -311,11 +314,14 @@ expand_long <- function(df, inventory=read_inventory(), verbose=TRUE){
   df$QFE.flag[is.na(df[['QFE']])] <- 0
   df$QFF.flag[is.na(df[['QFF']])] <- 0
   
-  
   ## reorder data frame to be more easily readable
-  dfnames <- c('Station', 'Longitude', 'Latitude', 'Location.missing', 'Elevation', 'Elevation.missing', 'UTC.date', 'Local.date', 'Year', 'Month', 'Day', 'Local.time', 'Time', 'Time.missing', P.names, 'P.units', 'mmHg', 'Tcorr', 'P.orig', 'QFE', 'QFE.flag', 'QFF', 'QFF.flag', names(df)[grep('^TP', names(df))], names(df)[grep('^TA', names(df))], 'T.units')
+  dfnames <- c('Station', 'Station.name', 'Longitude', 'Latitude', 'Location.missing', 'Elevation', 'Elevation.missing', 'UTC.date', 'Local.date', 'Year', 'Month', 'Day', 'Local.time', 'Time', 'Time.missing', P.names, 'P.units', 'mmHg', 'Tcorr', 'P.orig', 'QFE', 'QFE.flag', 'QFF', 'QFF.flag', names(df)[grep('^TP', names(df))], names(df)[grep('^TA', names(df))], 'T.units')
   dfnames <- intersect(dfnames, names(df))
   df <- df[,c(dfnames, setdiff(names(df), dfnames))]
+  
+  ## add in remaining information from repository
+  notinclude <- c('Standard.Name', 'Station', 'ISPD', 'Latitude', 'Longitude', 'Location.Flag', 'Elevation', 'Elevation.Flag', 'Unit', 'Tcorr', 'hasQFF', 'hasTP', 'T.units')
+  for (nn in setdiff(names(inventory), notinclude)) if (is.null(df[[nn]])) df[[nn]] <- inventory[[nn]]
   
   return(df)
 }
