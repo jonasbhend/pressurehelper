@@ -43,7 +43,7 @@ read_Nuuk <- function(infile){
   
   ## merge to dataframe
   out <- Reduce(merge, rmelt)
-  out$P.units <- 'Danish inches'
+  out$P.units <- 'French inches'
   out$Station <- 'Nuuk'
   
   return(out)
