@@ -13,7 +13,7 @@ read_Avignon <- function(infile){
   setMissingValue(wb, missvals)
   ## read in data
   rawdata <- readWorksheet(wb, sheet='Table 1816', startRow=5, endCol=12, endRow=371)
-  names(rawdata) <- c('Montext', 'Day', 'TA1', 'TA4', 'noval', 'TA2', 'TA3', 'noval', 'P1', 'P2', 'P3', 'P4')
+  names(rawdata) <- c('Montext', 'Day', 'TP1', 'TP4', 'noval', 'TP2', 'TP3', 'noval', 'P1', 'P2', 'P3', 'P4')
   ## remove empty columns
   rawdata <- rawdata[,-grep('noval', names(rawdata))]
   ## convert month text to Months
@@ -49,10 +49,10 @@ read_Avignon <- function(infile){
   ## merge to dataframe
   out <- Reduce(merge, rmelt)
   print("Converting pressure and temperature to numeric")
-  out$TA <- as.numeric(out$TA)
+  out$TP <- as.numeric(out$TP)
   out$P <- as.numeric(out$P)
   out$Station <- 'Avignon'
-  out$TA.units <- 'C'
+  out$TP.units <- 'C'
   out$P.units <- 'mm'
   out$Tcorr <- 0
   
