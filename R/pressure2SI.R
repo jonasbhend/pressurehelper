@@ -5,6 +5,8 @@
 #' @param pressure Local absolute pressure in mmHg
 #' @param temperature Local temperature in deg. C
 #' @param latitude latitude of location in degrees for gravity
+#' @param elevation station elevation in m for local gravity (defaults to 0)
+#' 
 #' 
 #' @examples
 #' ## should be 1000 hPa
@@ -12,13 +14,13 @@
 #' 
 #' @keywords util
 #' @export
-pressure2SI <- function(pressure, temperature, latitude){
+pressure2SI <- function(pressure, temperature, latitude, elevation=0){
   gamma <- 1.82e-4 ## thermal expansion of mercury at 0 deg. C
-  rho <- 13.5951e3 ## density of mercury at 0 deg. C
+  rho <- 1.35951e4 ## density of mercury at 0 deg. C
   pressure.corr <- (1 - gamma * temperature) * pressure
   
   ## convert to hPa
-  QFE <- rho * gravity(latitude) * pressure.corr * 1e-5
+  QFE <- rho * gravity(latitude, elevation) * pressure.corr * 1e-5
   
   return(QFE)
 }

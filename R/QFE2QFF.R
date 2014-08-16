@@ -31,6 +31,6 @@ QFE2QFF <- function(QFE, elevation, latitude, temperature){
   Tm <- temperature + elevation * lapse / 2
   
   
-  QFF <- QFE * exp(gravity(latitude)*elevation / Rd / Tm)
+  QFF <- QFE * exp(gravity(latitude, elevation)*elevation / Rd / Tm)
   return(QFF)
 }

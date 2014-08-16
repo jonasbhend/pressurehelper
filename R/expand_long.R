@@ -217,7 +217,7 @@ expand_long <- function(df, inventory=read_inventory(), verbose=TRUE){
       }
       
       ## convert mmHg to hPa and normalise gravity
-      df$P.orig <- pressure2SI(df$mmHg, 0, df$Latitude)
+      df$P.orig <- pressure2SI(df$mmHg, 0, df$Latitude, df$Elevation)
     }
     
     ## check if QFE is already available

@@ -3,7 +3,7 @@
 \alias{pressure2SI}
 \title{pressure2SI}
 \usage{
-pressure2SI(pressure, temperature, latitude)
+pressure2SI(pressure, temperature, latitude, elevation = 0)
 }
 \arguments{
 \item{pressure}{Local absolute pressure in mmHg}
@@ -11,6 +11,8 @@ pressure2SI(pressure, temperature, latitude)
 \item{temperature}{Local temperature in deg. C}
 
 \item{latitude}{latitude of location in degrees for gravity}
+
+\item{elevation}{station elevation in m for local gravity (defaults to 0)}
 }
 \description{
 Converts the absolute pressure in mmHg to hPa given the local temperature

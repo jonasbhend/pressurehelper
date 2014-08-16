@@ -3,10 +3,12 @@
 \alias{gravity}
 \title{gravity}
 \usage{
-gravity(phi)
+gravity(phi, elevation = 0)
 }
 \arguments{
 \item{phi}{latitude (in degrees)}
+
+\item{elevation}{elevation (in m)}
 }
 \description{
 Compute gravity at latitude phi
@@ -16,6 +18,9 @@ Compute gravity at latitude phi
 gravity(0)
 ## gravity at pole
 gravity(90)
+}
+\references{
+http://library.wmo.int/pmb_ged/wmo_8_en-2012.pdf
 }
 \keyword{util}
 
