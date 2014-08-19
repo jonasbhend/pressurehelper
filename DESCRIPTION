@@ -1,10 +1,16 @@
 Package: pressurehelper
-Title: What the package does (short line)
-Version: 0.1
+Title: Convert historical air pressure records
+Version: 1.0
 Authors@R: 'Jonas Bhend <jonas.bhend@gmx.ch> [aut, cre]'
-Description: What the package does (paragraph)
+Description: A collection of functions to convert historical records of
+    atmospheric pressure and temperature to a common data format. These
+    conversions include the estimation of observation times from qualitative
+    information (e.g. sunset), the conversion of non-SI length units used in
+    barometer readings, the conversion of non-SI temperature readings and the
+    extraction of climatological temperature from 20CR for a given observation
+    date and location.
 Depends:
-    R (>= 3.1.1),
+    R (>= 3.0.2),
     XLConnect,
     reshape2,
     ncdf,
