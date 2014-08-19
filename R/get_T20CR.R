@@ -71,10 +71,14 @@ get_T20CR <- function(lon, lat, time, tfile='~/Unibe/20CR/tmean.2m.1871-1900.nc'
     
     ## filter by time step (and reorganise)
     tsub.filter <- array(aperm(apply(array(tsub, c(nrow(tsub), 8, ncol(tsub)/8)), c(1:2), filter, tfilter, circular=TRUE), c(2,3,1)), dim(tsub))
-    
   
     ## select the appropriate time steps
     temp.out <- diag(tsub.filter[,time.i])
+
+    ## clean up (probably not needed)
+    rm(tall, tsub, tsub.filter)
+    gc()
+    
   }
 
   return(temp.out)
