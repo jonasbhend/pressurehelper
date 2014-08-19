@@ -30,7 +30,7 @@ expand_long <- function(df, inventory=read_inventory(), verbose=TRUE){
     if (!is.null(df[[nn]])) {
       df[[paste0(nn, '.orig')]] <- df[[nn]]
       df[[nn]] <- dms2dd(df[[nn]])
-      if (all(df[[nn]] == df[[paste0(nn, '.orig')]])) df[[paste0(nn, '.orig')]] <- NULL
+      if (all(df[[nn]][!is.na(df[[nn]])] == df[[paste0(nn, '.orig')]][!is.na(df[[nn]])])) df[[paste0(nn, '.orig')]] <- NULL
     } else {
       df[[nn]] <- dms2dd(inventory[[nn]])
     }
@@ -54,7 +54,14 @@ expand_long <- function(df, inventory=read_inventory(), verbose=TRUE){
   
   ## convert time in files
   for (nn in c('Year', 'Month', 'Day')) df[[nn]] <- as.numeric(as.character(df[[nn]]))
-  ## replace times if these are missing
+  ## insert Time if no time is present
+  if (is.null(df[['Time']])){
+    warning('Inserted time (14:00) as is missing', immediate. = FALSE)
+    if (verbose) print('WARNING: insert time (14:00) as time is missing')
+    df$Time <- '14:00'
+    df$Time.missing <- 1
+  }
+  ## replace times if these are missing  
   if (any(is.na(df$Time))){
     df$Time.missing <- is.na(df$Time)*1
     for (time.i in unique(df$Time.i[df$Time.missing == 1])){
