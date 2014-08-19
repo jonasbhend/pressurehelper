@@ -30,7 +30,7 @@ compact2long <- function(infile){
   
   ## read the header
   header <- readWorksheet(wb, sheet=1, endRow=10, endCol=2, header=FALSE)
-
+  
   ## read in the data
   rawdata <- readWorksheet(wb, sheet=1, startRow=11)
   
@@ -47,29 +47,40 @@ compact2long <- function(infile){
     }
   }
   
-  ## extract variable names to melt
+  ## find out whether data is in compact or long already
   rawnames <- names(rawdata)
-  meltnames <- setdiff(rawnames, c('Year', 'Month', 'Day'))
-  ## only replace first number (time indicator, less than nine observing times)
-  meltnames <- unique(sub('[0-9]', '', meltnames))
-
-  ## run the melt process
-  rmelt <- list()
-  for (mn in meltnames){
-    mnames <- c('Year', 'Month', 'Day', rawnames[grep(paste0('^', gsub('\\.', '.\\.', mn)), rawnames)])    
-    ## melt the dataframe
-    mtmp <- melt(rawdata[,mnames], mnames[1:3], value.name=mn)
-    ## extract time index (remove everything after the dot and all characters before)
-    vartmp <- gsub('\\..$', '', mtmp$variable)
-    vartxt <- unique(sub('[0-9]$', '', vartmp))
-    if (length(vartxt) > 1) print(vartxt)
-    mtmp$Time.i <- as.numeric(gsub(vartxt, '', vartmp))
-    rmelt[[mn]] <- mtmp[,-grep('variable', names(mtmp))]
-    rm(mtmp, vartxt, vartmp, mnames)
-  }
+  nameend <- substr(rawnames, nchar(rawnames), nchar(rawnames))
   
-  ## merge to dataframe
-  out <- Reduce(merge, rmelt)
+  ## check if multiple instances of the same name exist 
+  ## (denoted by trailing 1, 2, 3)
+  if (any(nameend == '1')){
+    
+    ## extract variable names to melt
+    meltnames <- setdiff(rawnames, c('Year', 'Month', 'Day'))
+    ## only replace first number (time indicator, less than nine observing times)
+    meltnames <- unique(sub('[0-9]', '', meltnames))
+    
+    ## run the melt process
+    rmelt <- list()
+    for (mn in meltnames){
+      mnames <- c('Year', 'Month', 'Day', rawnames[grep(paste0('^', gsub('\\.', '.\\.', mn)), rawnames)])    
+      ## melt the dataframe
+      mtmp <- melt(rawdata[,mnames], mnames[1:3], value.name=mn)
+      ## extract time index (remove everything after the dot and all characters before)
+      vartmp <- gsub('\\..$', '', mtmp$variable)
+      vartxt <- unique(sub('[0-9]$', '', vartmp))
+      if (length(vartxt) > 1) print(vartxt)
+      mtmp$Time.i <- as.numeric(gsub(vartxt, '', vartmp))
+      rmelt[[mn]] <- mtmp[,-grep('variable', names(mtmp))]
+      rm(mtmp, vartxt, vartmp, mnames)
+    }
+    
+    ## merge to dataframe
+    out <- Reduce(merge, rmelt)
+    
+  } else {
+    out <- rawdata
+  }
   
   ## append information in header
   if (any(!is.na(header[,2]))){
