@@ -160,7 +160,7 @@ expand_long <- function(df, inventory=read_inventory(), verbose=TRUE){
     if (is.null(df$TA.20CR)) df$TA.20CR <- Temp20CR - 273.15
   }
   
-  ## convert pressure from whatever to QFE
+  ## convert pressure from whatever hPa
   P.names <- setdiff(names(df)[grep('^P', names(df))], 'P.units')
   if (length(P.names) > 0){
     ## convert pressure reading
