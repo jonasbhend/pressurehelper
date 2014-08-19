@@ -27,7 +27,7 @@ QFE2QFF <- function(QFE, elevation, latitude, temperature){
     temperature <- temperature + 273.15
   }
   
-  ## compute virtual mean temperature below station
+  ## compute mean temperature in fictituous air column below station
   Tm <- temperature + elevation * lapse / 2
   
   
