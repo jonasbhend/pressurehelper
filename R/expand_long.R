@@ -64,9 +64,16 @@ expand_long <- function(df, inventory=read_inventory(), verbose=TRUE){
   ## replace times if these are missing  
   if (any(is.na(df$Time))){
     df$Time.missing <- is.na(df$Time)*1
-    for (time.i in unique(df$Time.i[df$Time.missing == 1])){
-      dtimes <- table(df$Time[df$Time.i == time.i & df$Time.missing == 0])
-      df$Time[df$Time.i == time.i & df$Time.missing == 1] <- names(dtimes)[which.max(dtimes)]
+    ## replace missing times with most frequent observation
+    if (!is.null(df$Time.i)){
+      for (time.i in unique(df$Time.i[df$Time.missing == 1])){
+        dtimes <- table(df$Time[df$Time.i == time.i & df$Time.missing == 0])
+        df$Time[df$Time.i == time.i & df$Time.missing == 1] <- names(dtimes)[which.max(dtimes)]
+      }      
+    } else {
+      dtimes <- table(df$Time[df$Time.missing == 0])
+      df$Time[df$Time.missing == 1] <- names(dtimes)[which.max(dtimes)]
+      if (verbose) print(paste('WARNING: replace missing times with', names(dtimes)[which.max(dtimes)]))
     }
     #     dtimes <- unique(df[!is.na(df$Time),c('Time.i', 'Time')])
     #     dtimes <- dtimes[dtimes$Time.i %in% df$Time.i[df$Time.missing], ]
