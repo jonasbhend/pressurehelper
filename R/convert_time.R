@@ -57,7 +57,7 @@ convert_time <- function(year, month, day, time, latitude=NULL){
       decl <- declination(JDymd(year, month, day))
       halfdaylength <- acos(-tan(latitude/180*pi)*tan(decl/180*pi))/pi*12
       sunsign <- c(-1, 1)[match(substr(tolower(time), 1, 6), c('sunris', 'sunset'))]
-      sunadd <- 0
+      sunadd <- rep(0, ntime)
       if (any(time == 'sunrise+12')) sunadd[which(time == 'sunrise+12')] <- 12
       suntime <- (12 + sunsign*halfdaylength)[sun.i]
       sunhour <- formatC(floor(suntime) + sunadd, width=2, flag='0')
