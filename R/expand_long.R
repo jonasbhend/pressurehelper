@@ -320,9 +320,9 @@ expand_long <- function(df, inventory=read_inventory(), verbose=TRUE){
   
   
   ## add in missing variables (dummies)
-  if (is.null(df[['mmHg']])) df$mmHg <- NA
-  if (is.null(df[['P.orig']])) df$P.orig <- NA
-  if (is.null(df[['QFE']])) df$QFE <- NA    
+  for (nn in c('mmHg', 'P.orig', 'QFE', 'TA.orig', 'TP.orig')){
+    if (is.null(df[[nn]])) df[[nn]] <- NA
+  }  
   
   ## fix flags for missing values
   df$QFE.flag[is.na(df[['QFE']])] <- 0
