@@ -68,7 +68,7 @@ expand_long <- function(df, inventory=read_inventory(), verbose=TRUE){
     if (!is.null(df$Time.i)){
       for (time.i in unique(df$Time.i[df$Time.missing == 1])){
         dtimes <- table(df$Time[df$Time.i == time.i & df$Time.missing == 0])
-        df$Time[df$Time.i == time.i & df$Time.missing == 1] <- names(dtimes)[which.max(dtimes)]
+        df$Time[df$Time.i == time.i & df$Time.missing == 1] <- if (is.numeric(dtimes)) as.numeric(names(dtimes)[which.max(dtimes)]) else names(dtimes)[which.max(dtimes)]
       }      
     } else {
       dtimes <- table(df$Time[df$Time.missing == 0])
