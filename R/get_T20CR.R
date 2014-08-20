@@ -36,6 +36,7 @@ get_T20CR <- function(lon, lat, time, tfile='~/Unibe/20CR/tmean.2m.1871-1900.nc'
   
   ## read in data at one point or all the data
   if (nlon == 1 & nlat == 1){
+    print('Extract specific lon/lat from file')
     lon.i <- which.min((unique(lon) - lons)**2)
     lat.i <- which.min((unique(lat) - lats)**2)
     tall <- get.var.ncdf(nc, 'tmean', start=c(lon.i, lat.i, 1), count=c(1,1,-1))
@@ -50,6 +51,7 @@ get_T20CR <- function(lon, lat, time, tfile='~/Unibe/20CR/tmean.2m.1871-1900.nc'
     temp.out <- tall[time.i]
     
   } else {
+    print('Read in all data and extract lon/lat later')
     ## Get all the temperature values    
     tall <- get.var.ncdf(nc, 'tmean')
     tall <- array(tall, c(length(tall)/dim(tall)[3], dim(tall)[3]))
