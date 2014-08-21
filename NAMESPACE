@@ -2,6 +2,7 @@
 
 export(QFE2QFF)
 export(compact2long)
+export(compute_dist)
 export(convert_time)
 export(dms2dd)
 export(expand_long)
